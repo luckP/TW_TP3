@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8"/>
+    <title>Connect4</title>
+    <script src="js/node/node.js"></script>
+    <script src="js/luc.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/field.js"></script>
+    <script src="js/menu.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/field.css">
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
+    <link rel="icon" href="img/logo.png">
+    <!-- <link rel="stylesheet" type="text/css" href="mobile.css" media="handheld"/> -->
+    <link rel="stylesheet" type="text/css" href="css/mobile.css" media="screen and (min-width: 200px) and (max-width: 400px)"/>
+    <link href="https://fonts.googleapis.com/css?family=Chakra+Petch" rel="stylesheet">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />-->
+</head>
+
+<body>
+
+    <!-- *******************MAIN MENU****************** -->
+
+    <div id="menu-card" class="card">
+        <div class="menu-frame">
+            <h1 class="menu-game-title">Connect4</h1>
+
+            <div class="menu-container fakeStart">
+                <div class="menu-title"><span>NEW GAME</span></div>
+                <div id="menu-container-new-game" class="menu-icon"></div>
+            </div>
+
+             <div class="menu-container flipCard" onclick="flipCardFunc('login-card')">
+                <div class="menu-title"><span>LOGIN</span></div>
+                <div id="menu-container-login" class="menu-icon"></div>
+            </div>
+
+            <div class="menu-container flipCard" onclick="flipCardFunc('config-card')">
+                <div class="menu-title"><span>SETTINGS</span></div>
+                <div id="menu-container-settings" class="menu-icon"></div>
+            </div>
+
+            <div class="menu-container flipCard" onclick="flipCardFunc('tutorial-card')">
+                <div class="menu-title"><span>TUTORIAL</span></div>
+                <div id="menu-container-tutorial" class="menu-icon"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- *******************LOGIN MENU****************** -->
+
+    <div id="login-card" class="card">
+        <div class="menu-frame">
+            <h1 class="menu-game-title">Connect4</h1>
+
+            <div class="menu-login-container">
+                <input class="menu-login-input" id="menu-login-email" type="email" value="" placeholder="EMAIL">
+            </div>
+
+            <div class="menu-login-container">
+                <input class="menu-login-input" id="menu-login-password" type="password" value="" placeholder="PASSWORD">
+            </div>
+            <div class="container-menu-login-new-user">            
+                <a class="menu-login-new-user flipCard" onclick="flipCardFunc('new-login-card')">create user</a>
+            </div>
+            <div class="container-login-buttons">
+                <button class="login-button login-button-confirm">CONFIRM</button>
+                <button class="login-button flipCard" onclick="flipCardFunc('menu-card')">CANCEL</button>             
+            </div>   
+        </div>
+    </div>
+
+    <!-- *******************NEW LOGIN MENU****************** -->
+
+    <div id="new-login-card" class="card">
+        <div class="menu-frame">
+            <h1 class="menu-game-title">Connect4</h1>
+
+            <div class="menu-login-container">
+                <input class="menu-login-input" id="menu-new-login-email" type="email" value="" placeholder="EMAIL">
+            </div>
+
+            <div class="menu-login-container">
+                <input class="menu-login-input" id="menu-new-login-password" type="password" value="" placeholder="PASSWORD">
+            </div>
+
+            <div class="menu-login-container">
+                <input class="menu-login-input" id="menu-new-login-rpassword" type="password" value="" placeholder="REPEAT PASSWORD">
+            </div>
+            <br>
+            <div class="container-login-buttons">
+                <button class="login-button login-button-confirm">CONFIRM</button>
+                <button class="login-button flipCard" onclick="flipCardFunc('login-card')">CANCEL</button>             
+            </div>   
+        </div>
+    </div>
+
+    <!-- *******************SETTINGS****************** -->
+
+     <div id="config-card" class="card">
+        <div class="menu-frame">
+            <h1 class="menu-game-title">Connect4</h1>
+
+            <div class="config-container">
+                <div class="config-title"><span>SELECT YOUR DIFFICULTY</span></div>
+                <button class="game-difficulty" onclick="gameDifficulty(EASY, this)">EASY</button>
+                <button class="game-difficulty" onclick="gameDifficulty(NORMAL, this)">NORMAL</button>
+                <button class="game-difficulty" onclick="gameDifficulty(HARD, this)">HARD</button>
+            </div>
+
+            <div class="config-container">
+                <div id="config-row-span" class="config-title"><span>ROW - 6</span></div>
+                <input id="row" type="range" min="4" max="20" value="6"
+                oninput= "showVal(this.value, 'config-row-span', 'ROW')" 
+                onchange="showVal(this.value, 'config-row-span', 'ROW')">
+                <div id="config-col-span" class="config-title"><span>COL - 7</span></div>
+                <input id="col" type="range" min="4" max="20" value="7"
+                oninput= "showVal(this.value, 'config-col-span', 'COL')" 
+                onchange="showVal(this.value, 'config-col-span', 'COL')">
+            </div>
+
+            <div class="config-container">
+                <div class="config-title"><span>WHO START THE GAME?</span></div>
+                <button id="game-start-robot" class="game-start" onclick="gameStart(0, IA_START)"></button>
+                <button id="game-start-user" class="game-start" style="border-color:#c0392b" onclick="gameStart(1, USER_START)"></button>
+            </div>
+
+            <div class="config-container">
+                <!-- <div class="config-title"><span>WHO START THE GAME?</span></div> -->
+                <button id="game-type-usersbot" onclick="gameType(true, this)" class="game-type"></button>
+                <button id="game-type-2users" onclick="gameType(false, this)" class="game-type"></button>
+            </div>
+
+            <div class="menu-container flipCard" onclick="flipCardFunc('menu-card')">
+                <div class="menu-title"><span>MENU</span></div>
+                <div class="menu-icon menu-container-menu"></div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- *******************TUTORIAL****************** -->
+
+    <div id="tutorial-card" class="card">
+        <div class="menu-frame">
+            <h1 class="menu-game-title">Connect4</h1>
+            <div class="container-tutorial">
+                <p>O quatro em linha joga-se numa grelha (geralmente 7 x 6) colocada na vertical. As peças colocadas numa das aberturas no topo da grelha caiem ao longo de calhas e ocupam a primeira posição livre, seja no fundo da grelha ou sobre outra peça. Cada jogador joga com peças de cor diferente e alternadamente coloca uma peça numa das calhas ainda não completamente preenchidas. Ganha o primeiro jogador que conseguir colocar 4 peças da sua cor alinhadas, na vertical, horizontal ou diagonal.</p>
+            </div>
+
+            <div class="menu-container flipCard" onclick="flipCardFunc('menu-card')">
+                <div class="menu-title"><span>MENU</span></div>
+                <div class="menu-icon menu-container-menu"></div>
+            </div>  
+        </div>
+    </div>
+
+    <div id="game-card" class="card">
+        <div id="game-container">
+            <button class="g-button flipCard" onclick="flipCardFunc('pop-up-card')"></button>
+            <div id="field">
+            </div>
+        </div>
+
+        <div id="game-title">
+                Player1: <div class="player-color" style="background-color: #18BC9C"></div>
+                Computer: <div class="player-color" style="background-color: #2C3E50"></div>
+        </div>
+    </div>
+
+    <!-- ******************* POP-UP MENSSAGE******************* -->
+
+
+    <div id="pop-up-card" class="card pop-up-card">
+        <div class="menu-frame game-pop-up">
+            <button class="close-pop-up-card close-pop-up">x</button>
+            <div class="menu-title">Options</div>
+            <div class="pop-up-btn pop-up-btn-expandable">TUTORIAL 
+                <br>
+                <p>O quatro em linha joga-se numa grelha (geralmente 7 x 6) colocada na vertical. As peças colocadas numa das aberturas no topo da grelha caiem ao longo de calhas e ocupam a primeira posição livre, seja no fundo da grelha ou sobre outra peça. Cada jogador joga com peças de cor diferente e alternadamente coloca uma peça numa das calhas ainda não completamente preenchidas. Ganha o primeiro jogador que conseguir colocar 4 peças da sua cor alinhadas, na vertical, horizontal ou diagonal.
+                </p>
+            </div>
+            <div class="pop-up-btn pop-up-btn-expandable">SCHEDULE
+                <div class="pop-up-btn-container-schedule">
+                    <div class="schedule-header">
+                        <div class="schedule-header-option">VICTORY <br><span>2</span></div>
+                        <div class="schedule-header-option">DRAW <br><span>2</span></div>
+                        <div class="schedule-header-option">LOSE <br><span>4</span></div>
+                    </div>
+                    <div class="container-schedule-history">
+                    <table class="schedule-history">
+                        <tr>
+                          <th>PLAYER</th>
+                          <th>ROW</th>
+                          <th>COL</th>
+                          <th>DIFFICULTY</th>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+            </div>
+            <button id="surrender-btn" class="pop-up-btn surrender">SURRENDER</button>
+            <button class="pop-up-btn flipCard" onclick="flipCardFunc('menu-card')">BACK TO MENU</button>
+        </div>
+        <div>
+            <div class="close-pop-up-background close-pop-up"></div>
+        </div>
+    </div>
+
+    <!-- ******************* MENSSAGE******************* -->
+
+    <div id="pop-up-card-message" class="card pop-up-card">
+        <div class="menu-frame game-pop-up">
+            <button class="close-pop-up-card close-pop-up">x</button>
+            <p>msg</p>
+            <button class="pop-up-btn pop-up-confirm">OK</button>
+            <button class="pop-up-btn close-pop-up">CANCEL</button>
+        </div>
+        <div>
+            <div class="close-pop-up-background close-pop-up"></div>
+        </div>
+    </div>
+
+    <!-- ******************* CONFIRM MENSSAGE******************* -->
+
+    <div id="confirm-pop-up-card" class="card pop-up-card">
+        <div class="menu-frame game-pop-up">
+            <button class="close-pop-up-card close-pop-up">x</button>
+            <div class="menu-title">SUCCESSFULLY</div>
+               Your account has been created successfully and is ready to use
+            <button class="pop-up-btn flipCard" onclick="flipCardFunc('menu-card')">GO TO MENU</button>
+        </div>
+        <div>
+            <div class="close-pop-up-background close-pop-up"></div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+    <!-- icons -->
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/daniele-de-santis" title="Daniele De Santis">Daniele De Santis</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/daniele-de-santis" title="Daniele De Santis">Daniele De Santis</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/lucy-g" title="Lucy G">Lucy G</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/those-icons" title="Those Icons">Those Icons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+    <!-- <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
+
+
+    <script src="js/index.js"></script>
+</body>
+</html>

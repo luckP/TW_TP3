@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style media="screen">
+      html {
+        filter: invert(100%);
+        background: black;
+      }
+    </style>
+  </head>
+  <body>
+    <form class="">
+      <select id="method">
+        <option value="POST">POST</option>
+        <option value="GET">GET</option>
+      </select>
+
+      <select id="url">
+        <option value="register">register</option>
+        <option value="join">join</option>
+        <option value="leave">leave</option>
+        <option value="notify">notify</option>
+        <option value="update">update</option>
+        <option value="ranking">ranking</option>
+      </select>
+      <br>
+
+      <input id="query" type="text" class="input_url_server" name="query" value="" placeholder="get query"><br>
+
+      <br>
+      <input id="group" type="text" class="input_test_server" name="group"  value="" placeholder="group"><br>
+      <input id="nick" type="text" class="input_test_server" name="nick"   value="" placeholder="nick"><br>
+      <input id="pass" type="text" class="input_test_server" name="pass"   value="" placeholder="pass"><br>
+      <input id="size" type="text" class="input_test_server" name="size"   value="" placeholder="size"><br>
+      <input id="game" type="text" class="input_test_server" name="game"   value="" placeholder="game"><br>
+      <input id="column" type="text" class="input_test_server" name="column" value="" placeholder="column"><br>
+
+      <button type="button" name="button" onclick="testeRequest()">ok</button>
+      <button type="button" name="button" onclick="resetRequest()">reset</button>
+    </form>
+
+    <iframe id="frame" name="frame"  width="500" height="500" style="borde:1px solid black"></iframe>
+
+    <script type="text/javascript">
+      const URL = 'http://localhost:8888/';
+      var eventSource;
+
+      function resetRequest(){
+        document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML = '';
+      }
+
+      function testeRequest(){
+        let url = URL+document.getElementById('url').value;
+        let method = document.getElementById('method').value;
+        let body = {};
+        let inputs = document.getElementsByClassName('input_test_server');
+        for (let i = 0; i<inputs.length; i++) {
+            if(inputs[i].value){
+              if( inputs[i].name == 'size')
+                body[inputs[i].name] = {'rows': inputs[i].value, 'columns': inputs[i].value};
+              else
+                body[inputs[i].name] = inputs[i].value;
+            }
+        }
+        console.log(body);
+        if(method == 'POST'){
+
+          fetch(url, (method == 'POST')? {
+            method: method,
+            body: JSON.stringify(body),
+          }:{
+            method: method,
+          })
+          .then(response => {
+            if(!response.ok)
+              throw('erro');
+            console.log('ok');
+            console.log(response);
+            return response.text();
+          })
+          .then(j=>{
+            document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML = j+'<br>' + document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML ;
+
+          })
+          .catch((m)=>{
+            console.error(m);
+            document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML = m+'<br>' + document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML ;
+          });
+      }
+      else{
+        // !query.group || !query.nick || !query.game
+        url +="?group="+   document.getElementById('group').value;
+        url +="&nick="+    document.getElementById('nick').value;
+        url +="&game="+    document.getElementById('game').value;
+        eventSource = new EventSource(url);
+        eventSource.onerror = function(){
+          document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML = "Error: Impossible to restore game status =/", flipCard('menu-card') +'<br>' + document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML;
+
+        }
+        eventSource.onmessage = function(event) {
+          console.log('eventSource.onmessage');
+          document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML = event.data+'<br>' + document.getElementById('frame').contentWindow.document.getElementsByTagName("body")[0].innerHTML ;
+         }
+
+         }
+      }
+    </script>
+  </body>
+</html>

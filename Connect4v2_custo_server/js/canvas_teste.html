@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      *{
+        margin: 0;
+      }
+      canvas{
+        border: 1px solid black;
+        padding-left: 0;
+        padding-right: 0;
+        margin: 20px auto;
+        /* margin-left: auto; */
+        /* margin-right: auto; */
+        display: block;
+      }
+
+      input{
+        font-size:20px;
+        padding:5px;
+        float:left;
+      }
+
+      button{
+        border-radius: 0;
+        padding: 5px;
+        height: 37px;
+        width: 81px;
+        background: white;
+        text-decoration: none;
+        font-size: 16px;
+      }
+    </style>
+    <title></title>
+  </head>
+  <body>
+    <input id="num_col" type="number" name="" value="20" placeholder="num_col">
+    <input id="num_lin" type="number" name="" value="20" placeholder="num_lin">
+    <button type="button" name="button" onclick="reloadBoard()">reload</button>
+
+    <canvas id="board_canvas" width="1000" height="1000" onclick="play"></canvas>
+
+
+    <script type="text/javascript" src="canvas.js"></script>
+  </body>
+</html>
