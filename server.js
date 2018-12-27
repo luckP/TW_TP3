@@ -2,7 +2,6 @@ const http   = require('http');
 const url    = require('url');
 const fetch  = require('node-fetch');
 
-
 const game = require('./game.js');
 const server = http.createServer(function(request, response){
   const parseUrl = url.parse(request.url, true);
