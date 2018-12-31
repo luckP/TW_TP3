@@ -149,7 +149,7 @@ module.exports.leave = function(data_request, response){
       }
       response.writeHead(200, header.POST);
 
-      if(typeof !d.groups[data_request.group].games[data_request.game].nick2!== 'undefined'){
+      if(typeof !d.groups[data_request.group].games[data_request.game].nick2=== 'undefined'){
         console.log('leave success1');
         delete d.groups[data_request.group].games[data_request.game];
         updateDataBase(d);
