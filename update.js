@@ -21,9 +21,16 @@ module.exports.update = function(game, message){
     r.write('data: '+ message+'\n\n');
 }
 
-module.exports.close = function(game){
-  for(let i in  responses[game])
-     responses[game][i].end();
+module.exports.close = function(game, code){
+  // console.log('close');
+  // responses[game][code].end();
 
-  delete responses[game];
+  // if(responses[game].length == 0)
+  //   delete responses[game];
+
+
+  // for(let i in  responses[game])
+  //    responses[game][i].end();
+  //
+  // delete responses[game];
 }

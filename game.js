@@ -8,15 +8,20 @@ const data_path = 'data.json';
 function checkDataBase(){
   try {
     if (!fs.existsSync(data_path)) {
-      fs.open(data_path, 'w', function (err, file) {
+
+      fs.writeFileSync(data_path, '{"groups":{},"ranking":{}}', { flag: 'w+'},function (err) {
         if (err) throw err;
       });
-      console.log('Created file');
-      let d = {
-        'groups':{},
-        'ranking':{}
-      }
-      updateDataBase(d);
+
+      // fs.open(data_path, 'w', function (err, file) {
+      //   if (err) throw err;
+      // });
+      // console.log('Created file');
+      // let d = {
+      //   'groups':{},
+      //   'ranking':{}
+      // }
+      // updateDataBase(d);
     }
   } catch (err){
     console.error(err);
@@ -24,13 +29,16 @@ function checkDataBase(){
 }
 
 function updateDataBase(data){
-  // console.log(data);
-  // try {
-    fs.writeFile(data_path, JSON.stringify(data), function (err) {
+    fs.writeFile(data_path, '', { flag: 'w+'},function (err) {
       if (err) throw err;
-      console.log('update file');
+      fs.writeFile(data_path, JSON.stringify(data), { flag: 'w+'},function (err) {
+        if (err) throw err;
+        console.log('update file');
+      });
     });
 }
+
+
 const header =  {'POST': {'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*'},
                  'SSE':  {'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*', 'Connection': 'keep-alive'}
                 };
@@ -70,7 +78,6 @@ module.exports.register = function(data_request, response){
 
           updateDataBase(d);
           response.end();
-
         }
       }
     });
@@ -135,16 +142,27 @@ module.exports.leave = function(data_request, response){
   fs.readFile(data_path, (err,data) => {
     if(!err) {
       let d = JSON.parse(data.toString());
-      if( !data_request.group || !data_request.nick || !data_request.game || Object.keys(data_request).length != 3){
+      if( !data_request.group || !data_request.nick || !data_request.pass || !data_request.game || Object.keys(data_request).length != 4){
         console.log('bad request');
         badRequestError(data_request, response);
         return;
       }
       response.writeHead(200, header.POST);
+
+      if(typeof !d.groups[data_request.group].games[data_request.game].nick2!== 'undefined'){
+        console.log('leave success1');
+        delete d.groups[data_request.group].games[data_request.game];
+        updateDataBase(d);
+        response.end();
+        // update.close(data_request.game, 0);
+        return;
+      }
+
       let rank_key = d.groups[data_request.group].games[data_request.game].size.columns+''+d.groups[data_request.group].games[data_request.game].size.rows;
 
       if(!d.ranking[rank_key])
         d.ranking[rank_key] = {};
+
 
       if(data_request.nick == d.groups[data_request.group].games[data_request.game].nick1){
         update.update(data_request.game, '{ "winner": "'+d.groups[data_request.group].games[data_request.game].nick2+'" } ');
@@ -206,36 +224,29 @@ function checkEndGame(d, data_request){
         // console.log("testando data_request + j ---------------->       "+data_request.column + j);
         cont_hori = ( cont_hori!==false && data_request.column + j < num_columns && board[data_request.column + j][i] == user_nick)? cont_hori+1: false;
         cont_vert = ( cont_vert!==false && i + j < num_rows && board[data_request.column][i+j]   == user_nick)? cont_vert+1: false;
-        cont_dia1 = ( cont_dia1!==false && data_request.column + j < num_columns && i + j < num_rows  && board[data_request.column+j][i+j] == user_nick)? cont_dia1+1: false;
-        cont_dig2 = ( cont_dig2!==false && data_request.column + j < num_columns && i + j >= 0  && board[data_request.column][i]     == user_nick)? cont_dig2+1: false;
+        cont_dia1 = ( cont_dia1!==false && data_request.column + j < num_columns && i + j < num_rows && board[data_request.column+j][i+j] == user_nick)? cont_dia1+1: false;
+        cont_dig2 = ( cont_dig2!==false && data_request.column + j < num_columns && i - j >= 0 && board[data_request.column+j][i-j] == user_nick)? cont_dig2+1: false;
+        console.log('cont_dig2=>' + cont_dig2);
 
         if( ((cont_hori)&&(cont_hori==4))||((cont_vert)&&(cont_vert==4))||((cont_dia1)&&(cont_dia1==4))||((cont_dig2)&&(cont_dig2==4)) ){
-
-
           let rank_key = d.groups[data_request.group].games[data_request.game].size.columns+''+d.groups[data_request.group].games[data_request.game].size.rows;
 
           if(!d.ranking[rank_key])
             d.ranking[rank_key] = {};
 
 
-          if(!d.ranking[rank_key][data_request.group + '' +data_request])
-            d.ranking[rank_key][data_request.group + '' +data_request] = {'group':data_request.group,'nick':data_request.nick, 'num_win': 0};
-          d.ranking[rank_key][data_request.group + '' +data_request].num_win++;
+          if(!d.ranking[rank_key][data_request.group + '' +data_request.nick])
+            d.ranking[rank_key][data_request.group + '' +data_request.nick] = {'group':data_request.group,'nick':data_request.nick, 'num_win': 0};
+          d.ranking[rank_key][data_request.group + '' +data_request.nick].num_win++;
+          delete d.groups[data_request.group].games[data_request.game];
           updateDataBase(d);
 
           return true;
         }
       }
-
-
-
-
       return false;
     }
   }
-
-
-
   return false;
 }
 
@@ -245,7 +256,7 @@ module.exports.notify = function(data_request, response){
   fs.readFile(data_path, (err,data) => {
     if(!err) {
       let d = JSON.parse(data.toString());
-      if( !data_request.group || !data_request.nick || !data_request.pass || !data_request.game || !data_request.column || Object.keys(data_request).length != 5){
+      if( !data_request.group || !data_request.nick || !data_request.pass || !data_request.game || typeof data_request.column === 'undefined' || Object.keys(data_request).length != 5){
         console.log('bad request1');
         badRequestError(data_request, response);
         return;
@@ -254,14 +265,14 @@ module.exports.notify = function(data_request, response){
       if(data_request.column>=d.groups[data_request.group].games[data_request.game].size.column || data_request.column<0){
         // jogada fora do escopo
         console.log('bad request2');
-        badRequestError(data_request, response);
+        badRequestError(data_request, response, '{ "error": "Column reference is negative" }');
         return;
       }
 
       if(d.groups[data_request.group].games[data_request.game].turn != data_request.nick){
         // nao é o turno
         console.log('bad request3');
-        badRequestError(data_request, response);
+        badRequestError(data_request, response, '{ "error": "Not your turn to play" } ');
         return;
       }
 
@@ -275,14 +286,17 @@ module.exports.notify = function(data_request, response){
       if(!playColumn(d, data_request)){
         // coluna cheia
         console.log('bad request5');
-        badRequestError(data_request, response);
+        badRequestError(data_request, response, '{ "error": "Column reference is negative" }');
         return;
       }
 
       let message;
+      let board = d.groups[data_request.group].games[data_request.game].board;
       if(checkEndGame(d, data_request)){
-        message = { "winner": data_request.nick, "board":  d.groups[data_request.group].games[data_request.game].board, 'column': data_request.column};
+        message = { "winner": data_request.nick, "board": board, 'column': data_request.column};
         update.update(data_request.game, JSON.stringify(message));
+
+
         // update.close(data_request.game);
       }
       else{
@@ -330,14 +344,6 @@ module.exports.update = function(request, response, parseUrl){
 }
 // --------------------------------------------------------------------------------------------------------------------------------------------------------
 // {"size": { "rows": 6, "columns": 7 } }
-function filter(r){
-  let ret = [];
-  for(let i of r)
-    ret.push(i.num_win);
-
-  return ret;
-}
-
 
 module.exports.ranking = function(data_request, response){
   checkDataBase();
@@ -360,7 +366,6 @@ module.exports.ranking = function(data_request, response){
         for(let i=rank.length-2; i>=0 && rank[i].num_win<d.ranking[size][r].num_win; i--){
           rank[i+1] = rank[i];
           rank[i] = d.ranking[size][r];
-          console.log(filter(rank));
         }
       }
 
@@ -385,8 +390,8 @@ module.exports.error = function(data_request, response){
  checkDataBase();
 }
 
-function badRequestError(data_request, response){
+function badRequestError(data_request, response, msg){
   response.writeHead(404, header.POST);
-  response.end();
+  response.end(msg);
 
 }

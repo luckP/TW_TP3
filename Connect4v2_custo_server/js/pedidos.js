@@ -12,7 +12,7 @@ function register(){
 
     flipCard('confirm-pop-up-card');
     webStorage = new WebStorage();
-    reloadField();
+    // reloadField();
   }
 ).catch(error =>{
   loadTextMessagePopUp(error);
@@ -103,7 +103,7 @@ function endGame(d){
 }
 
 function update(){
-  let url = URL+'update?'+'nick='+nick+'&game='+game_pedido+'&group='+group;
+  let url = URL+'update?'+'group='+group+'&nick='+nick+'&game='+game_pedido;
     eventSource = new EventSource(url);
     eventSource.onerror = function(){
       loadTextMessagePopUp("Error: Impossible to restore game status =/", flipCard('menu-card'));
@@ -129,10 +129,16 @@ function update(){
             play(d.column, room);
             // player won
             if(d.winner){
+              console.log("teste=>"+d.winner+"<=");
               endGame(d);
             }
             else{
-              let data = JSON.stringify({'game_history': game_history});
+              let data = JSON.stringify({'game': game_pedido,
+                                         'play_history': play_history,
+                                         'row': Number(document.getElementById('row').value),
+                                         'col': Number(document.getElementById('col').value),
+                                         'datetime': new Date(),
+                                         'game_history': game_history});
               webStorage.saveGameStatus(nick, data);
           }
           break;
