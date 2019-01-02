@@ -25,7 +25,7 @@ class Room {
 }
 
 function reloadField(){
-	let restore = webStorage.loadGame(nick);
+	// let restore = webStorage.loadGame(nick);
 	if(restore){
 		if(restore.play_history){
 			pvp = true;
@@ -145,7 +145,7 @@ function play(n, game) {
 						flipCard('menu-card');
 						loadTextMessagePopUp("Draw!\nWould you like to play again?", gameStart);
 					}
-					webStorage.saveGameStatus(nick, JSON.stringify({'game_history': game_history}));
+					// webStorage.saveGameStatus(nick, JSON.stringify({'game_history': game_history}));
 				}
 				else if(!game.turn){
 					if(!pvp){
@@ -158,7 +158,7 @@ function play(n, game) {
 						flipCard('menu-card');
 						loadTextMessagePopUp("Player: "+winning_player+" win!\nWould you like to play again?", gameStart);
 					}
-					webStorage.saveGameStatus(nick, JSON.stringify({'game_history': game_history}));
+					// webStorage.saveGameStatus(nick, JSON.stringify({'game_history': game_history}));
 				}
 
 				else{
@@ -173,7 +173,7 @@ function play(n, game) {
 						flipCard('menu-card');
 						loadTextMessagePopUp("Player: "+winning_player+" win!\nWould you like to play again?", gameStart);
 					}
-					webStorage.saveGameStatus(nick, JSON.stringify({'game_history': game_history}));
+					// webStorage.saveGameStatus(nick, JSON.stringify({'game_history': game_history}));
 				}
 
 				let fd = document.getElementsByClassName("cell");

@@ -44,7 +44,7 @@
     <iframe id="frame" name="frame"  width="500" height="500" style="borde:1px solid black"></iframe>
 
     <script type="text/javascript">
-      const URL = 'http://localhost:8888/';
+      const URL = 'http://localhost:8174/';
       var eventSource;
 
       function resetRequest(){
@@ -75,7 +75,8 @@
           })
           .then(response => {
             if(!response.ok)
-              throw('erro');
+              return(response.text());
+
             console.log('ok');
             console.log(response);
             return response.text();

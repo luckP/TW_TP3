@@ -11,7 +11,7 @@ function register(){
       throw('You have entered an invalid username or password');
 
     flipCard('confirm-pop-up-card');
-    webStorage = new WebStorage();
+    // webStorage = new WebStorage();
     // reloadField();
   }
 ).catch(error =>{
@@ -96,7 +96,7 @@ function endGame(d){
     loadTextMessagePopUp("Player: "+d.winner+" wins!\nWould you like to play again?", gameStart);
   else
     loadTextMessagePopUp("W.O.! You win!\nWould you like to play again?", gameStart);
-  webStorage.removeData(nick);
+  // webStorage.removeData(nick);
   play_history = [];
   wait = false;
 
@@ -106,8 +106,8 @@ function update(){
   let url = URL+'update?'+'group='+group+'&nick='+nick+'&game='+game_pedido;
     eventSource = new EventSource(url);
     eventSource.onerror = function(){
-      loadTextMessagePopUp("Error: Impossible to restore game status =/", flipCard('menu-card'));
-
+      // loadTextMessagePopUp("Error: Impossible to restore game status =/", flipCard('menu-card'));
+      // update();
     }
     eventSource.onmessage = function(event) {
         let d = JSON.parse(event.data);
@@ -120,7 +120,7 @@ function update(){
           break;
           case 2: // pair players
             document.getElementById('game-title-player2').innerHTML = 'Player2: ';
-            webStorage.removeData(nick);
+            // webStorage.removeData(nick);
             play_history = [];
             wait = false;
             flipCard('game-card');
@@ -129,7 +129,6 @@ function update(){
             play(d.column, room);
             // player won
             if(d.winner){
-              console.log("teste=>"+d.winner+"<=");
               endGame(d);
             }
             else{
@@ -139,7 +138,7 @@ function update(){
                                          'col': Number(document.getElementById('col').value),
                                          'datetime': new Date(),
                                          'game_history': game_history});
-              webStorage.saveGameStatus(nick, data);
+              // webStorage.saveGameStatus(nick, data);
           }
           break;
           default:

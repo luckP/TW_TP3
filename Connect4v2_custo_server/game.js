@@ -51,7 +51,7 @@ module.exports.register = function(data_request, response){
         let d = JSON.parse(data.toString());
         if(!data_request.nick || !data_request.pass || !data_request.group || Object.keys(data_request).length != 3){
           console.log('bad request');
-          badRequestError(data_request, response);
+          badRequestError('400', data_request, response, '{ "error": "missing arguments"}');
           return;
         }
 
@@ -61,18 +61,18 @@ module.exports.register = function(data_request, response){
         if(d.groups[data_request.group].nicks[data_request.nick]){
           if( d.groups[data_request.group].nicks[data_request.nick].pass  == crypto.createHmac('sha256', secret).update( data_request.pass).digest('hex')){
             response.writeHead(200, header.POST);
-            response.write('login');
+            response.write('{}');
             console.log('login success');
           }
           else{
             console.log('login fail');
-            badRequestError(data_request, response);
+            badRequestError('401', data_request, response, '{ "error": "User registered with a different password"} ');
           }
           response.end();
         }
         else{
           response.writeHead(200, header.POST);
-          response.write('register && login');
+          response.write('{}');
           console.log('register success')
           d.groups[data_request.group].nicks[data_request.nick] = {'pass':crypto.createHmac('sha256', secret).update( data_request.pass ).digest('hex'), 'num_games': 0};
 
@@ -90,7 +90,7 @@ module.exports.join = function(data_request, response){
       let d = JSON.parse(data.toString());
       if( !data_request.group || !data_request.nick || !data_request.pass || !data_request.size || Object.keys(data_request).length != 4){
         console.log('bad request');
-        badRequestError(data_request, response);
+        badRequestError('400', data_request, response, '{ "error": "missing arguments"}');
         return;
       }
 
@@ -144,9 +144,16 @@ module.exports.leave = function(data_request, response){
       let d = JSON.parse(data.toString());
       if( !data_request.group || !data_request.nick || !data_request.pass || !data_request.game || Object.keys(data_request).length != 4){
         console.log('bad request');
-        badRequestError(data_request, response);
+        badRequestError('400', data_request, response, '{ "error": "missing arguments"}');
         return;
       }
+
+      if(!d.groups[data_request.group].games[data_request.game]){
+        console.log('bad request');
+        badRequestError('400', data_request, response, '{ "error": "missing arguments"}');
+        return;
+      }
+
       response.writeHead(200, header.POST);
       console.log(d.groups[data_request.group].games[data_request.game].nick2);
       if(typeof d.groups[data_request.group].games[data_request.game].nick2 === 'undefined'){
@@ -226,7 +233,6 @@ function checkEndGame(d, data_request){
         cont_vert = ( cont_vert!==false && i + j < num_rows && board[data_request.column][i+j]   == user_nick)? cont_vert+1: false;
         cont_dia1 = ( cont_dia1!==false && data_request.column + j < num_columns && i + j < num_rows && board[data_request.column+j][i+j] == user_nick)? cont_dia1+1: false;
         cont_dig2 = ( cont_dig2!==false && data_request.column + j < num_columns && i - j >= 0 && board[data_request.column+j][i-j] == user_nick)? cont_dig2+1: false;
-        console.log('cont_dig2=>' + cont_dig2);
 
         if( ((cont_hori)&&(cont_hori==4))||((cont_vert)&&(cont_vert==4))||((cont_dia1)&&(cont_dia1==4))||((cont_dig2)&&(cont_dig2==4)) ){
           let rank_key = d.groups[data_request.group].games[data_request.game].size.columns+''+d.groups[data_request.group].games[data_request.game].size.rows;
@@ -258,45 +264,44 @@ module.exports.notify = function(data_request, response){
       let d = JSON.parse(data.toString());
       if( !data_request.group || !data_request.nick || !data_request.pass || !data_request.game || typeof data_request.column === 'undefined' || Object.keys(data_request).length != 5){
         console.log('bad request1');
-        badRequestError(data_request, response);
+        badRequestError('400', data_request, response, '{ "error": "missing arguments"}');
         return;
       }
 
       if(data_request.column>=d.groups[data_request.group].games[data_request.game].size.column || data_request.column<0){
         // jogada fora do escopo
         console.log('bad request2');
-        badRequestError(data_request, response, '{ "error": "Column reference is negative" }');
+        badRequestError('400', data_request, response, '{ "error": "Column reference is negative" }');
         return;
       }
 
       if(d.groups[data_request.group].games[data_request.game].turn != data_request.nick){
         // nao é o turno
         console.log('bad request3');
-        badRequestError(data_request, response, '{ "error": "Not your turn to play" } ');
+        badRequestError('400', data_request, response, '{ "error": "Not your turn to play" } ');
         return;
       }
 
       if(!d.groups[data_request.group].games[data_request.game].nick2){
         // tentou jogar quando ainda nao tem um oponente
         console.log('bad request4');
-        badRequestError(data_request, response);
+        badRequestError('400', data_request, response);
         return;
       }
 
       if(!playColumn(d, data_request)){
         // coluna cheia
         console.log('bad request5');
-        badRequestError(data_request, response, '{ "error": "Column reference is negative" }');
+        badRequestError('400', data_request, response, '{ "error": "Column reference is negative" }');
         return;
       }
 
       let message;
       let board = d.groups[data_request.group].games[data_request.game].board;
       if(checkEndGame(d, data_request)){
+        console.log('data_request=>'+JSON.stringify(data_request));
         message = { "winner": data_request.nick, "board": board, 'column': data_request.column};
         update.update(data_request.game, JSON.stringify(message));
-
-
         // update.close(data_request.game);
       }
       else{
@@ -305,7 +310,7 @@ module.exports.notify = function(data_request, response){
     }
 
       response.writeHead(200, header.POST);
-      response.write('notify');
+      response.write('{}');
       response.end();
       console.log('notify success');
       return;
@@ -323,20 +328,21 @@ module.exports.update = function(request, response, parseUrl){
       var query = parseUrl.query;
       if( !query.group || !query.nick || !query.game || Object.keys(query).length != 3){
         console.log('bad request');
-        badRequestError(request, response);
+        badRequestError('400', data_request, response, '{ "error": "missing arguments"}');
         return;
       }
 
       request.on('close',(data_request, fs, query)=>{
-        let new_data = update.close(data_request, fs, query);
-        if(new_data)
-          updateDataBase(d);
+        // update.close(query.game, (query.nick ==  d.groups[query.group].games[query.game].nick1)?0:1);
+        // if(new_data)
+        //   updateDataBase(d);
       });
 
       response.writeHead(200, header.SSE);
       update.save(query.game, response);
 
       // if have two players send message
+      console.log(query);
       if(update.checkGameStart(query.game))
         update.update(query.game, JSON.stringify({ "turn": d.groups[query.group].games[query.game].turn, "board": d.groups[query.group].games[query.game].board } ));
     }
@@ -351,7 +357,7 @@ module.exports.ranking = function(data_request, response){
     if(!err) {
       if( !data_request.size || Object.keys(data_request).length != 1){
         console.log('bad request');
-        badRequestError(data_request, response);
+        badRequestError('400', data_request, response, '{ "error": "missing arguments"}');
         return;
       }
 
@@ -386,12 +392,12 @@ module.exports.ranking = function(data_request, response){
 }
 // --------------------------------------------------------------------------------------------------------------------------------------------------------
 module.exports.error = function(data_request, response){
- badRequestError(data_request, response);
+ badRequestError('400', data_request, response,  '{error: ""}');
  checkDataBase();
 }
 
-function badRequestError(data_request, response, msg){
-  response.writeHead(404, header.POST);
+function badRequestError(error_code, data_request, response, msg){
+  response.writeHead(error_code, header.POST);
   response.end(msg);
 
 }

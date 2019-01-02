@@ -22,8 +22,8 @@ module.exports.update = function(game, message){
 }
 
 module.exports.close = function(game, code){
-  // console.log('close');
-  // responses[game][code].end();
+  console.log('close');
+  responses[game][code].end();
 
   // if(responses[game].length == 0)
   //   delete responses[game];
