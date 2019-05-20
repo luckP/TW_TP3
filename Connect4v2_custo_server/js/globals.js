@@ -1,5 +1,5 @@
-const URL = 'http://localhost:8111/';
-// const URL = 'http://twserver.alunos.dcc.fc.up.pt:8111/';
+// const URL = 'http://localhost:8111/';
+const URL = 'http://twserver.alunos.dcc.fc.up.pt:8111/';
 var room;
 
 // var aiBot = true;
